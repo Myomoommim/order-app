@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url'
 import pg from 'pg'
 import 'dotenv/config'
 import { parseDatabaseUrl } from '../src/db/parseDatabaseUrl.js'
-import { withPgSsl } from '../src/db/pgOptions.js'
+import { isManagedPostgresUrl, withPgSsl } from '../src/db/pgOptions.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const dbDir = path.join(__dirname, '../src/db')
@@ -57,7 +57,7 @@ async function main() {
   const { database, adminUrl, appUrl } = parseDatabaseUrl(databaseUrl)
 
   console.log('PostgreSQL 초기화 시작...')
-  const isManagedCloud = databaseUrl.includes('render.com')
+  const isManagedCloud = isManagedPostgresUrl(databaseUrl)
   if (!isManagedCloud) {
     await ensureDatabase(adminUrl, database)
   } else {
