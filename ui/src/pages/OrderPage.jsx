@@ -5,7 +5,7 @@ import MenuCard from '../components/MenuCard'
 import Cart from '../components/Cart'
 import './OrderPage.css'
 
-function OrderPage() {
+function OrderPage({ onPlaceOrder }) {
   const [cart, setCart] = useState([])
 
   function handleAddToCart(item) {
@@ -17,6 +17,7 @@ function OrderPage() {
   }
 
   function handleOrder() {
+    onPlaceOrder(cart)
     alert('주문이 접수되었습니다.')
     setCart([])
   }

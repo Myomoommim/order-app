@@ -1,0 +1,32 @@
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.admin-section {
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+}
+
+.admin-section__title {
+  display: inline-block;
+  margin: 0 0 1.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-decoration: none;
+}
+
+.admin-section__title::after {
+  content: '';
+  display: block;
+  width: 55%;
+  height: 2px;
+  margin: 0.4rem auto 0;
+  background: #1a1a1a;
+  border-radius: 1px;
+}
