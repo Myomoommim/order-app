@@ -7,13 +7,28 @@
   background: #fff;
 }
 
-.logo {
+.header__title {
   margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.logo-link {
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  cursor: pointer;
   color: #1a1a1a;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.logo-link:hover {
+  color: var(--color-primary);
+}
+
+.logo-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .nav {
@@ -29,6 +44,7 @@
   border: 2px solid var(--color-primary);
   border-radius: 4px;
   cursor: pointer;
+  text-decoration: none;
   transition: background-color 0.15s, border-color 0.15s;
 }
 
@@ -43,6 +59,11 @@
   border-color: var(--color-primary-active);
   color: #fff;
   font-weight: 600;
+}
+
+.nav-tab:focus-visible {
+  outline: 2px solid #1a1a1a;
+  outline-offset: 2px;
 }
 
 @media (max-width: 480px) {
