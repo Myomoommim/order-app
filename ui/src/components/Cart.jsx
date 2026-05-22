@@ -1,5 +1,5 @@
 import { useToast } from '../hooks/useToast'
-import { formatPrice } from '../utils/format'
+import { formatPriceWithUsd } from '../utils/format'
 import {
   formatCartLineName,
   getCartTotal,
@@ -61,7 +61,7 @@ function Cart({ items, onOrder, onUpdateQuantity, ordering = false }) {
                       </button>
                     </div>
                     <span className="cart__line-price">
-                      {formatPrice(getLineTotal(item))}
+                      {formatPriceWithUsd(getLineTotal(item))}
                     </span>
                   </li>
                 )
@@ -71,7 +71,7 @@ function Cart({ items, onOrder, onUpdateQuantity, ordering = false }) {
         </div>
         <div className="cart__summary">
           <p className="cart__total">
-            총 금액 <strong>{formatPrice(total)}</strong>
+            총 금액 <strong>{formatPriceWithUsd(total)}</strong>
           </p>
           <button
             type="button"

@@ -4,7 +4,7 @@ import './InventorySection.css'
 function InventorySection({ inventory, onUpdateStock, pendingMenuId = null }) {
   return (
     <section className="admin-section inventory-section">
-      <h2 className="admin-section__title">재고 현황</h2>
+      <h2 className="admin-section__title">해외 재고 현황</h2>
       <div className="inventory-grid">
         {inventory.map((item) => {
           const status = getStockStatus(item.stock)

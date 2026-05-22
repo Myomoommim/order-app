@@ -4,8 +4,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #fafafa;
-  box-shadow: 0 0 24px rgba(0, 0, 0, 0.06);
+  background: var(--bg-app);
+  box-shadow: var(--shadow-app);
 }
 
 .main {
@@ -27,7 +27,7 @@
 
 .btn--primary {
   background: var(--color-primary);
-  color: #fff;
+  color: #0f1114;
 }
 
 .btn--primary:hover:not(:disabled) {
@@ -35,7 +35,8 @@
 }
 
 .btn--primary:disabled {
-  background: #a0c4e8;
+  background: #3d4f63;
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 

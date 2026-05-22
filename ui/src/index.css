@@ -1,8 +1,27 @@
 :root {
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-primary-active: #1e40af;
+  --color-primary: #60a5fa;
+  --color-primary-hover: #93c5fd;
+  --color-primary-active: #3b82f6;
+  --color-danger: #f87171;
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+
+  --bg-page: #0f1114;
+  --bg-app: #161a1f;
+  --bg-surface: #1e2329;
+  --bg-elevated: #262c34;
+  --bg-input: #2a3139;
+
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa3ad;
+  --text-muted: #6b7280;
+
+  --border-color: #3a424c;
+  --border-subtle: #2d343c;
+
+  --shadow-app: 0 0 32px rgba(0, 0, 0, 0.45);
   --layout-max-width: 1080px;
+  --section-stack-gap: 3rem;
 }
 
 *,
@@ -15,8 +34,8 @@ body {
   margin: 0;
   font-family: system-ui, 'Segoe UI', Roboto, 'Malgun Gothic', sans-serif;
   line-height: 1.5;
-  color: #1a1a1a;
-  background: #eceff1;
+  color: var(--text-primary);
+  background: var(--bg-page);
 }
 
 #root {
@@ -28,4 +47,8 @@ body {
 
 button {
   font-family: inherit;
+}
+
+input[type='checkbox'] {
+  accent-color: var(--color-primary);
 }

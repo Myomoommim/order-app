@@ -1,7 +1,7 @@
 .order-list__empty {
   margin: 0;
-  color: #888;
-  font-size: 0.95rem;
+  color: var(--text-muted);
+  font-size: 1.05rem;
 }
 
 .order-list {
@@ -16,7 +16,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.85rem 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .order-list__item:last-child {
@@ -33,27 +33,29 @@
 }
 
 .order-list__date {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 500;
   white-space: nowrap;
+  color: var(--text-primary);
 }
 
 .order-list__items {
-  font-size: 0.95rem;
-  color: #333;
+  font-size: 1.05rem;
+  color: var(--text-secondary);
 }
 
 .order-list__price {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 500;
   white-space: nowrap;
+  color: var(--color-primary);
 }
 
 .order-list__status {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-primary);
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(96, 165, 250, 0.15);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
 }

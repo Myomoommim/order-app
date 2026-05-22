@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { fetchMenus } from '../api/menus'
 import { createOrder } from '../api/orders'
 import { ApiError } from '../api/client'
+import { MENU_CATEGORIES } from '../data/menus'
 import { addToCart, updateCartQuantity } from '../utils/cart'
 import { useToast } from '../hooks/useToast'
 import MenuCard from '../components/MenuCard'
@@ -24,6 +25,13 @@ function OrderPage() {
   const [error, setError] = useState(null)
   const { showToast } = useToast()
 
+  const menusByCategory = useMemo(() => {
+    return MENU_CATEGORIES.map((category) => ({
+      ...category,
+      items: menus.filter((menu) => menu.category === category.id),
+    }))
+  }, [menus])
+
   useEffect(() => {
     loadMenus()
   }, [])
@@ -35,7 +43,7 @@ function OrderPage() {
       const data = await fetchMenus()
       setMenus(data.menus)
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : '메뉴를 불러오지 못했습니다.')
+      setError(err instanceof ApiError ? err.message : '상품을 불러오지 못했습니다.')
     } finally {
       setLoading(false)
     }
@@ -68,8 +76,8 @@ function OrderPage() {
   return (
     <div className="order-page">
       <section className="menu-section">
-        <h2 className="menu-section__title">MENU</h2>
-        {loading && <p className="order-page__message">메뉴를 불러오는 중...</p>}
+        <h2 className="menu-section__title">CATALOG</h2>
+        {loading && <p className="order-page__message">상품을 불러오는 중...</p>}
         {error && (
           <p className="order-page__message order-page__message--error">
             {error}
@@ -79,9 +87,16 @@ function OrderPage() {
           </p>
         )}
         {!loading && !error && (
-          <div className="menu-grid">
-            {menus.map((menu) => (
-              <MenuCard key={menu.id} menu={menu} onAddToCart={handleAddToCart} />
+          <div className="menu-sections">
+            {menusByCategory.map((section) => (
+              <div key={section.id} className="menu-category">
+                <h3 className="menu-category__title">{section.label}</h3>
+                <div className="menu-grid">
+                  {section.items.map((menu) => (
+                    <MenuCard key={menu.id} menu={menu} onAddToCart={handleAddToCart} />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}

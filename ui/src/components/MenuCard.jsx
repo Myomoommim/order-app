@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import { formatPrice } from '../utils/format'
+import { formatPriceWithUsd } from '../utils/format'
 import { buildCartItem } from '../utils/cart'
 import './MenuCard.css'
 
-const FALLBACK_IMAGE = '/menu/americano-hot.jpg'
+const PLACEHOLDER_IMAGE = '/menu/placeholder.svg'
 
 function MenuCard({ menu, onAddToCart }) {
   const [selectedOptionIds, setSelectedOptionIds] = useState([])
-  const [imageSrc, setImageSrc] = useState(menu.imageUrl)
+  const [imageSrc, setImageSrc] = useState(menu.imageUrl || PLACEHOLDER_IMAGE)
   const isSoldOut = menu.soldOut
 
   function toggleOption(optionId) {
@@ -38,37 +38,39 @@ function MenuCard({ menu, onAddToCart }) {
           alt={menu.name}
           className="menu-card__image"
           loading="lazy"
-          onError={() => setImageSrc(FALLBACK_IMAGE)}
+          onError={() => setImageSrc(PLACEHOLDER_IMAGE)}
         />
       </div>
       <h2 id={`menu-name-${menu.id}`} className="menu-card__name">
         {menu.name}
       </h2>
-      <p className="menu-card__price">{formatPrice(menu.price)}</p>
+      <p className="menu-card__price">{formatPriceWithUsd(menu.price)}</p>
       <p className="menu-card__description">{menu.description}</p>
       {isSoldOut && <p className="menu-card__sold-out">품절</p>}
-      <ul className="menu-card__options">
-        {menu.options.map((option) => {
-          const optionInputId = `${menu.id}-${option.id}`
-          return (
-          <li key={option.id}>
-            <label className="menu-card__option" htmlFor={optionInputId}>
-              <input
-                id={optionInputId}
-                type="checkbox"
-                checked={selectedOptionIds.includes(option.id)}
-                onChange={() => toggleOption(option.id)}
-                disabled={isSoldOut}
-              />
-              <span>
-                {option.name} ({option.price > 0 ? '+' : ''}
-                {formatPrice(option.price)})
-              </span>
-            </label>
-          </li>
-          )
-        })}
-      </ul>
+      {menu.options.length > 0 && (
+        <ul className="menu-card__options">
+          {menu.options.map((option) => {
+            const optionInputId = `${menu.id}-${option.id}`
+            return (
+              <li key={option.id}>
+                <label className="menu-card__option" htmlFor={optionInputId}>
+                  <input
+                    id={optionInputId}
+                    type="checkbox"
+                    checked={selectedOptionIds.includes(option.id)}
+                    onChange={() => toggleOption(option.id)}
+                    disabled={isSoldOut}
+                  />
+                  <span>
+                    {option.name} ({option.price > 0 ? '+' : ''}
+                    {formatPriceWithUsd(option.price)})
+                  </span>
+                </label>
+              </li>
+            )
+          })}
+        </ul>
+      )}
       <button
         type="button"
         className="btn btn--primary menu-card__add"

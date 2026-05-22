@@ -1,25 +1,26 @@
 .admin-page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--section-stack-gap);
   width: 100%;
 }
 
 .admin-section {
-  border: 1px solid #d0d0d0;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1.25rem 1.5rem;
-  background: #fff;
+  background: var(--bg-surface);
 }
 
 .admin-page__message {
   margin: 2rem 0;
   text-align: center;
-  color: #666;
+  color: var(--text-secondary);
+  font-size: 1.05rem;
 }
 
 .admin-page__message--error {
-  color: #b91c1c;
+  color: var(--color-danger);
 }
 
 .admin-page__retry {
@@ -27,10 +28,14 @@
   margin: 0.75rem auto 0;
   padding: 0.5rem 1rem;
   color: var(--color-primary);
-  background: #fff;
+  background: var(--bg-surface);
   border: 1px solid var(--color-primary);
   border-radius: 4px;
   cursor: pointer;
+}
+
+.admin-page__retry:hover {
+  background: var(--bg-elevated);
 }
 
 .admin-section__title {
@@ -38,7 +43,7 @@
   margin: 0 0 1.25rem;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-primary);
   text-decoration: none;
 }
 
@@ -48,6 +53,6 @@
   width: 55%;
   height: 2px;
   margin: 0.4rem auto 0;
-  background: #1a1a1a;
+  background: var(--color-primary);
   border-radius: 1px;
 }

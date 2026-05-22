@@ -1,6 +1,6 @@
 import { ORDER_STATUS } from '../constants/orderStatus'
 import { getCartTotal, getLineTotal } from './cart'
-import { formatPrice } from './format'
+import { formatPriceWithUsd } from './format'
 
 export function formatOrderDate(isoString) {
   const date = new Date(isoString)
@@ -58,6 +58,6 @@ export function formatOrderDisplay(order) {
   return {
     dateLabel: formatOrderDate(order.createdAt),
     itemsLabel: formatOrderItemsSummary(order.items),
-    priceLabel: formatPrice(order.totalAmount),
+    priceLabel: formatPriceWithUsd(order.totalAmount),
   }
 }

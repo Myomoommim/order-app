@@ -11,16 +11,16 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 1.25rem 1rem;
-  border: 1px solid #d0d0d0;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: #fafafa;
+  background: var(--bg-elevated);
   min-height: 100px;
 }
 
 .admin-dashboard__label {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .admin-dashboard__value {

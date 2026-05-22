@@ -1,6 +1,6 @@
 # COZY — 프론트엔드 (ui)
 
-커피 주문 앱의 React 프론트엔드입니다. [Vite](https://vite.dev/) + React + JavaScript(바닐라 JS, TypeScript 미사용)로 구성되어 있습니다.
+총기·탄약 주문 앱의 React 프론트엔드입니다. [Vite](https://vite.dev/) + React + JavaScript(바닐라 JS, TypeScript 미사용)로 구성되어 있습니다.
 
 ## 기술 스택
 

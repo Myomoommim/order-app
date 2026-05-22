@@ -3,8 +3,8 @@ import './AdminDashboard.css'
 const STAT_ITEMS = [
   { key: 'total', label: '총 주문' },
   { key: 'received', label: '주문 접수' },
-  { key: 'inProgress', label: '제조 중' },
-  { key: 'completed', label: '제조 완료' },
+  { key: 'inProgress', label: '배송 중' },
+  { key: 'completed', label: '배송 완료' },
 ]
 
 function AdminDashboard({ stats }) {

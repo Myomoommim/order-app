@@ -1,20 +1,20 @@
 .menu-card {
   display: flex;
   flex-direction: column;
-  border: 1px solid #d0d0d0;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 1rem;
-  background: #fff;
+  padding: 1.15rem;
+  background: var(--bg-surface);
   min-width: 0;
   height: 100%;
 }
 
 .menu-card__image-wrap {
-  aspect-ratio: 4 / 3;
-  border-radius: 4px;
+  margin: -0.15rem -0.15rem 0.85rem;
+  border-radius: 6px 6px 0 0;
   overflow: hidden;
-  margin-bottom: 0.75rem;
-  background: #f0f0f0;
+  background: var(--bg-elevated);
+  aspect-ratio: 4 / 3;
 }
 
 .menu-card__image {
@@ -25,52 +25,53 @@
 }
 
 .menu-card__name {
-  margin: 0 0 0.25rem;
-  font-size: 1.1rem;
-  font-weight: 600;
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
 }
 
 .menu-card__price {
-  margin: 0 0 0.5rem;
-  font-size: 1rem;
+  margin: 0 0 0.6rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: var(--color-primary);
+  line-height: 1.4;
 }
 
 .menu-card__description {
-  margin: 0 0 0.75rem;
-  font-size: 0.85rem;
-  color: #666;
-  line-height: 1.4;
+  margin: 0 0 0.85rem;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  flex: 1;
 }
 
 .menu-card__options {
   list-style: none;
   margin: 0 0 1rem;
   padding: 0;
-  flex: 1;
 }
 
 .menu-card__options li + li {
-  margin-top: 0.35rem;
+  margin-top: 0.45rem;
 }
 
 .menu-card__option {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  color: var(--text-primary);
   cursor: pointer;
+  line-height: 1.4;
 }
 
 .menu-card__add {
   width: 100%;
   margin-top: auto;
-}
-
-.menu-card__add:disabled {
-  background: #a0c4e8;
-  cursor: not-allowed;
+  font-size: 1.05rem;
 }
 
 .menu-card--sold-out {
@@ -79,7 +80,7 @@
 
 .menu-card__sold-out {
   margin: 0 0 0.5rem;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  color: #b91c1c;
+  color: var(--color-danger);
 }
