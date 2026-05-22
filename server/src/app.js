@@ -11,7 +11,28 @@ const app = express()
 
 app.use(
   cors({
-    origin: config.corsOrigin,
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true)
+        return
+      }
+
+      if (config.corsOrigins.includes(origin)) {
+        callback(null, true)
+        return
+      }
+
+      // Render 배포: *.onrender.com 프론트에서 API 호출 허용
+      if (
+        config.nodeEnv === 'production' &&
+        /^https:\/\/[\w-]+\.onrender\.com$/.test(origin)
+      ) {
+        callback(null, true)
+        return
+      }
+
+      callback(new Error(`CORS blocked: ${origin}`))
+    },
     credentials: true,
   }),
 )
