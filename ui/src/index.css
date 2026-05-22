@@ -1,0 +1,31 @@
+:root {
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-active: #1e40af;
+  --layout-max-width: 1080px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, 'Segoe UI', Roboto, 'Malgun Gothic', sans-serif;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #eceff1;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+button {
+  font-family: inherit;
+}
