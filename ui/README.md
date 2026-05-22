@@ -43,6 +43,18 @@ ui/
 └── vite.config.js
 ```
 
+## Render 배포 (Static Site)
+
+| 항목 | 값 |
+|------|-----|
+| Root Directory | `ui` |
+| Build Command | `npm install && npm run build` |
+| Publish Directory | `dist` |
+| Environment | `VITE_API_URL=https://order-app-8pdk.onrender.com/api` |
+
+프로덕션 빌드는 `ui/.env.production`에 동일한 API URL이 설정되어 있습니다.  
+백엔드 `CORS_ORIGIN`에는 배포된 프론트 URL(예: `https://<프론트>.onrender.com`)을 넣어야 합니다.
+
 ## 관련 문서
 
 - 요구사항: `../docs/PRD.md`
