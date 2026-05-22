@@ -393,3 +393,321 @@
 - 주문 목록 필터(날짜, 상태)
 - 관리자 로그인
 - 제조 완료 주문 목록 접기/페이지네이션
+
+---
+
+## 5. 백엔드 요구사항
+
+프론트엔드(4장)와 연동하는 **REST API** 및 **PostgreSQL** 데이터 모델을 정의한다. 인증·결제는 범위 외이며, Node.js + Express로 구현한다.
+
+### 5.1 데이터 모델
+
+#### 5.1.1 개요
+
+| 엔티티 | 설명 |
+|--------|------|
+| **Menus** | 판매 커피 메뉴(이름, 설명, 가격, 이미지, 재고) |
+| **Options** | 메뉴에 연결되는 추가 옵션(이름, 추가 가격) |
+| **Orders** | 고객 주문(주문 일시, 상태, 총액) 및 주문 상세(메뉴·수량·옵션·금액) |
+
+엔티티 관계:
+
+```
+Menus 1 ── N Options (메뉴별 옵션)
+Orders 1 ── N OrderItems (주문 줄)
+OrderItems 1 ── N OrderItemOptions (주문 시점 옵션 스냅샷)
+OrderItems N ── 1 Menus
+```
+
+#### 5.1.2 Menus (메뉴)
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | UUID 또는 SERIAL | O | PK |
+| name | VARCHAR | O | 커피 이름 (예: 아메리카노 (ICE)) |
+| description | TEXT | | 한 줄 설명 |
+| price | INTEGER | O | 기본 가격(원, 정수) |
+| image_url | VARCHAR | | 이미지 URL 또는 `/menu/...` 경로 |
+| stock | INTEGER | O | 재고 수량, 기본 0 이상 |
+| created_at | TIMESTAMPTZ | O | 생성 시각 |
+| updated_at | TIMESTAMPTZ | O | 수정 시각 |
+
+- 주문하기 화면 API 응답에는 **이름·설명·가격·이미지·옵션 목록**을 포함한다.
+- **재고(stock)** 는 주문하기 목록에는 노출하지 않거나 품절 여부만 표시하고, **관리자 재고 현황** API에서 수량 전체를 제공한다(4.2.5).
+
+#### 5.1.3 Options (옵션)
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | UUID 또는 SERIAL | O | PK |
+| menu_id | FK → menus.id | O | 연결할 메뉴 |
+| name | VARCHAR | O | 옵션 이름 (예: 샷 추가, 시럽 추가) |
+| price | INTEGER | O | 옵션 추가 가격(원, 0 가능) |
+| created_at | TIMESTAMPTZ | O | 생성 시각 |
+
+- 동일 옵션명이라도 **메뉴마다 별도 행**으로 두어도 되고, 공통 옵션 테이블 + `menu_options` 조인 테이블로 확장해도 된다.
+- 주문 시점 가격은 **Orders 상세에 스냅샷**으로 저장한다(이후 옵션 가격 변경과 무관).
+
+#### 5.1.4 Orders (주문)
+
+**orders (주문 헤더)**
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | UUID 또는 SERIAL | O | PK, 주문 ID |
+| ordered_at | TIMESTAMPTZ | O | 주문 일시 |
+| status | VARCHAR | O | 주문 상태 (아래 5.1.5) |
+| total_amount | INTEGER | O | 주문 총액(원) |
+| created_at | TIMESTAMPTZ | O | 레코드 생성 시각 |
+| updated_at | TIMESTAMPTZ | O | 상태 변경 시각 |
+
+**order_items (주문 상세 — 메뉴·수량·금액)**
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | UUID 또는 SERIAL | O | PK |
+| order_id | FK → orders.id | O | 주문 ID |
+| menu_id | FK → menus.id | O | 메뉴 ID |
+| menu_name | VARCHAR | O | 주문 시점 메뉴명(스냅샷) |
+| quantity | INTEGER | O | 수량 |
+| unit_price | INTEGER | O | 1개당 단가(기본가 + 옵션 합) |
+| line_total | INTEGER | O | 줄 금액 (unit_price × quantity) |
+
+**order_item_options (주문 상세 — 선택 옵션)**
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | UUID 또는 SERIAL | O | PK |
+| order_item_id | FK → order_items.id | O | 주문 상세 ID |
+| option_id | FK → options.id | | 원본 옵션 ID(참고용) |
+| option_name | VARCHAR | O | 주문 시점 옵션명(스냅샷) |
+| option_price | INTEGER | O | 주문 시점 옵션 가격(스냅샷) |
+
+- **주문 내용**은 `order_items` + `order_item_options`로 표현하며, 관리자 「주문 현황」 표시 형식(4.2.6)과 맞춘다.
+
+#### 5.1.5 주문 상태 (Orders.status)
+
+프론트엔드(4.2.6)와 동일한 값을 사용한다.
+
+| DB 값 | 표시명 | 설명 |
+|--------|--------|------|
+| `RECEIVED` | 주문 접수 | 고객이 「주문하기」 완료 시 **기본 상태** |
+| `IN_PROGRESS` | 제조 중 | 관리자가 「제조 시작」 실행 후 |
+| `COMPLETED` | 제조 완료 | 관리자가 「제조 완료」 실행 후 |
+
+상태 전이:
+
+```
+RECEIVED ──(제조 시작)──> IN_PROGRESS ──(제조 완료)──> COMPLETED
+```
+
+- 신규 주문 생성 API는 항상 `RECEIVED`로 저장한다.
+- `COMPLETED` 이후 추가 전이는 없다.
+
+#### 5.1.6 재고 차감 정책
+
+- **주문 생성(POST 주문)** 시, 주문 상세에 포함된 각 `menu_id`에 대해 `quantity`만큼 `menus.stock`을 차감한다.
+- 재고가 부족하면 주문을 **거부**하고 4xx 응답 + 메시지를 반환한다(트랜잭션 처리 권장).
+- 관리자의 재고 +/- 조정은 별도 API로 처리하며, 주문 차감과 동일한 `menus.stock` 컬럼을 사용한다.
+
+---
+
+### 5.2 데이터 스키마를 위한 사용자 흐름
+
+아래 흐름은 DB读写 기준으로 정리하며, 4장 UI 동작과 1:1로 대응한다.
+
+**1. 메뉴 조회 → 화면 표시**
+
+1. 서버의 **Menus**(및 연결된 **Options**)를 조회한다.
+2. 주문하기 화면에는 메뉴 이름·설명·가격·이미지·옵션 목록을 표시한다.
+3. **재고 수량**은 주문하기 화면에 직접 노출하지 않고, **관리자 재고 현황**에서 Menus.stock을 표시·수정한다(품절 시 주문하기에서 담기 제한은 선택 구현).
+
+**2. 메뉴 선택 → 장바구니**
+
+1. 사용자가 메뉴·옵션을 선택하고 「담기」를 누른다.
+2. 선택 정보는 **브라우저 메모리(장바구니)** 에만 유지되며, 이 단계에서는 DB에 쓰지 않는다.
+
+**3. 주문하기 → Orders 저장**
+
+1. 장바구니에서 「주문하기」를 누르면 **Orders**에 주문 헤더(주문 일시, 상태=`RECEIVED`, 총액)를 저장한다.
+2. 동시에 **order_items** / **order_item_options**에 메뉴·수량·옵션·줄 금액을 저장한다.
+3. 주문 내용에 따라 **Menus.stock**을 차감한다(5.1.6).
+4. 성공 시 주문 ID를 응답하고, 프론트는 장바구니를 비운다.
+
+**4. Orders → 관리자 주문 현황**
+
+1. **Orders** 목록을 조회해 관리자 「주문 현황」에 표시한다(주문 일시, 메뉴·수량·옵션 요약, 금액, 상태).
+2. 기본 표시 상태는 **주문 접수**(`RECEIVED`)이다.
+3. 관리자가 「제조 시작」을 누르면 상태를 **제조 중**(`IN_PROGRESS`)으로 변경한다.
+4. 「제조 완료」를 누르면 **제조 완료**(`COMPLETED`)로 변경한다.
+5. 대시보드(4.2.4) 집계는 Orders.status 기준으로 서버에서 계산해 제공한다.
+
+---
+
+### 5.3 API 설계
+
+기본 URL prefix: `/api` (예: `http://localhost:3000/api`). JSON 요청·응답. CORS는 프론트엔드(`ui` 개발 서버) origin을 허용한다.
+
+#### 5.3.1 메뉴 API (주문하기)
+
+**GET `/api/menus`**
+
+- **목적**: 주문하기 화면 진입 시 DB에서 커피 메뉴 목록을 불러온다.
+- **응답 예시**:
+
+```json
+{
+  "menus": [
+    {
+      "id": "americano-ice",
+      "name": "아메리카노 (ICE)",
+      "description": "시원하고 깔끔한 아이스 아메리카노",
+      "price": 4000,
+      "imageUrl": "/menu/americano-ice.jpg",
+      "options": [
+        { "id": "extra-shot", "name": "샷 추가", "price": 500 },
+        { "id": "syrup", "name": "시럽 추가", "price": 0 }
+      ]
+    }
+  ]
+}
+```
+
+- 재고 부족 메뉴는 `soldOut: true` 등으로 표시할 수 있다(선택).
+
+#### 5.3.2 주문 API
+
+**POST `/api/orders`**
+
+- **목적**: 사용자가 「주문하기」를 누르면 주문 정보를 DB에 저장하고 재고를 차감한다.
+- **요청 본문 예시**:
+
+```json
+{
+  "items": [
+    {
+      "menuId": "americano-ice",
+      "quantity": 1,
+      "optionIds": ["extra-shot"]
+    },
+    {
+      "menuId": "americano-hot",
+      "quantity": 2,
+      "optionIds": []
+    }
+  ]
+}
+```
+
+- **서버 처리**:
+  1. 메뉴·옵션 가격으로 단가·줄 금액·총액 계산(프론트 금액과 **서버 재검증**).
+  2. 재고 충분 여부 확인.
+  3. `orders`, `order_items`, `order_item_options` INSERT.
+  4. `menus.stock` 차감.
+  5. `status = RECEIVED`, `ordered_at = now()` 설정.
+
+- **응답 예시 (201)**:
+
+```json
+{
+  "order": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "orderedAt": "2026-05-22T10:30:00.000Z",
+    "status": "RECEIVED",
+    "totalAmount": 12500,
+    "items": [
+      {
+        "menuName": "아메리카노 (ICE)",
+        "quantity": 1,
+        "options": [{ "name": "샷 추가", "price": 500 }],
+        "lineTotal": 4500
+      }
+    ]
+  }
+}
+```
+
+- **에러**: 재고 부족 `409`, 잘못된 메뉴/옵션 `400`, 서버 오류 `500`.
+
+**GET `/api/orders/:orderId`**
+
+- **목적**: 주문 ID를 전달하면 해당 주문 정보를 반환한다.
+- **응답**: POST 생성 응답과 동일한 주문 객체 구조(단건).
+
+#### 5.3.3 관리자 API (프론트 4.2 연동)
+
+**GET `/api/admin/orders`**
+
+- **목적**: 관리자 「주문 현황」·대시보드용 주문 목록(최신순).
+- **쿼리(선택)**: `status` 필터.
+- **응답**: 주문 배열 + 각 주문의 일시·상태·총액·items 요약.
+
+**PATCH `/api/admin/orders/:orderId/status`**
+
+- **목적**: 주문 상태 변경(제조 시작 / 제조 완료).
+- **요청**: `{ "status": "IN_PROGRESS" }` 또는 `{ "status": "COMPLETED" }`
+- **규칙**: `RECEIVED` → `IN_PROGRESS` → `COMPLETED` 순서만 허용.
+
+**GET `/api/admin/menus/stock`**
+
+- **목적**: 관리자 「재고 현황」— 메뉴별 `id`, `name`, `stock`.
+- **응답 예시**:
+
+```json
+{
+  "inventory": [
+    { "menuId": "americano-ice", "menuName": "아메리카노 (ICE)", "stock": 10 },
+    { "menuId": "americano-hot", "menuName": "아메리카노 (HOT)", "stock": 10 },
+    { "menuId": "cafe-latte", "menuName": "카페라떼", "stock": 10 }
+  ]
+}
+```
+
+**PATCH `/api/admin/menus/:menuId/stock`**
+
+- **목적**: 재고 +/- 반영(관리자 버튼).
+- **요청**: `{ "delta": 1 }` 또는 `{ "delta": -1 }`, 또는 `{ "stock": 10 }` (절대값 방식 중 하나로 통일).
+- **규칙**: stock은 0 미만 불가.
+
+**GET `/api/admin/dashboard`**
+
+- **목적**: 대시보드 4지표 일괄 조회.
+- **응답**: `{ "total": 1, "received": 1, "inProgress": 0, "completed": 0 }` (4.2.4 집계 기준).
+
+#### 5.3.4 API 요약
+
+| 메서드 | 경로 | 용도 |
+|--------|------|------|
+| GET | `/api/menus` | 주문하기 — 메뉴·옵션 목록 조회 |
+| POST | `/api/orders` | 주문 저장 + 재고 차감 |
+| GET | `/api/orders/:orderId` | 주문 단건 조회 |
+| GET | `/api/admin/orders` | 관리자 — 주문 목록 |
+| PATCH | `/api/admin/orders/:orderId/status` | 관리자 — 상태 변경 |
+| GET | `/api/admin/menus/stock` | 관리자 — 재고 조회 |
+| PATCH | `/api/admin/menus/:menuId/stock` | 관리자 — 재고 수정 |
+| GET | `/api/admin/dashboard` | 관리자 — 대시보드 집계 |
+
+---
+
+### 5.4 비기능 요구사항
+
+| 항목 | 내용 |
+|------|------|
+| DB | PostgreSQL, 마이그레이션 또는 초기 seed SQL 제공 |
+| 트랜잭션 | 주문 생성 + 재고 차감은 단일 트랜잭션 |
+| 에러 형식 | `{ "error": { "code": "...", "message": "..." } }` 통일 권장 |
+| 환경 변수 | `DATABASE_URL`, `PORT`, `CORS_ORIGIN` |
+| 로깅 | 개발 환경에서 요청·SQL 오류 로그 |
+
+---
+
+### 5.5 백엔드 수용 기준 (Acceptance Criteria)
+
+- [ ] Menus, Options, Orders(및 상세 테이블) 스키마가 PostgreSQL에 생성된다.
+- [ ] GET `/api/menus`로 메뉴·옵션 목록을 조회할 수 있다.
+- [ ] POST `/api/orders`로 주문이 저장되고 상태는 `RECEIVED`이다.
+- [ ] 주문 생성 시 주문 일시·메뉴·수량·옵션·금액이 저장된다.
+- [ ] 주문 생성 시 해당 메뉴 재고가 차감되고, 부족 시 주문이 거부된다.
+- [ ] GET `/api/orders/:orderId`로 단건 주문을 조회할 수 있다.
+- [ ] 관리자 API로 주문 목록·상태 변경·재고 조회/수정·대시보드 집계가 가능하다.
+- [ ] 상태 전이: `RECEIVED` → `IN_PROGRESS` → `COMPLETED`가 동작한다.
