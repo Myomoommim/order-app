@@ -1,7 +1,11 @@
 import express from 'express'
 import cors from 'cors'
 import config from './config/index.js'
+import { AppError } from './utils/AppError.js'
 import healthRouter from './routes/health.js'
+import menusRouter from './routes/menus.js'
+import ordersRouter from './routes/orders.js'
+import adminRouter from './routes/admin.js'
 
 const app = express()
 
@@ -14,6 +18,9 @@ app.use(
 app.use(express.json())
 
 app.use('/api', healthRouter)
+app.use('/api', menusRouter)
+app.use('/api', ordersRouter)
+app.use('/api', adminRouter)
 
 app.use((req, res) => {
   res.status(404).json({
@@ -25,6 +32,12 @@ app.use((req, res) => {
 })
 
 app.use((err, _req, res, _next) => {
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      error: { code: err.code, message: err.message },
+    })
+  }
+
   console.error(err)
   res.status(500).json({
     error: {

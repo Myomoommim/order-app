@@ -8,6 +8,7 @@ const FALLBACK_IMAGE = '/menu/americano-hot.jpg'
 function MenuCard({ menu, onAddToCart }) {
   const [selectedOptionIds, setSelectedOptionIds] = useState([])
   const [imageSrc, setImageSrc] = useState(menu.imageUrl)
+  const isSoldOut = menu.soldOut
 
   function toggleOption(optionId) {
     setSelectedOptionIds((prev) =>
@@ -18,6 +19,7 @@ function MenuCard({ menu, onAddToCart }) {
   }
 
   function handleAdd() {
+    if (isSoldOut) return
     const selectedOptions = menu.options.filter((opt) =>
       selectedOptionIds.includes(opt.id),
     )
@@ -26,7 +28,10 @@ function MenuCard({ menu, onAddToCart }) {
   }
 
   return (
-    <article className="menu-card" aria-labelledby={`menu-name-${menu.id}`}>
+    <article
+      className={`menu-card${isSoldOut ? ' menu-card--sold-out' : ''}`}
+      aria-labelledby={`menu-name-${menu.id}`}
+    >
       <div className="menu-card__image-wrap">
         <img
           src={imageSrc}
@@ -41,6 +46,7 @@ function MenuCard({ menu, onAddToCart }) {
       </h2>
       <p className="menu-card__price">{formatPrice(menu.price)}</p>
       <p className="menu-card__description">{menu.description}</p>
+      {isSoldOut && <p className="menu-card__sold-out">품절</p>}
       <ul className="menu-card__options">
         {menu.options.map((option) => {
           const optionInputId = `${menu.id}-${option.id}`
@@ -52,6 +58,7 @@ function MenuCard({ menu, onAddToCart }) {
                 type="checkbox"
                 checked={selectedOptionIds.includes(option.id)}
                 onChange={() => toggleOption(option.id)}
+                disabled={isSoldOut}
               />
               <span>
                 {option.name} ({option.price > 0 ? '+' : ''}
@@ -67,8 +74,9 @@ function MenuCard({ menu, onAddToCart }) {
         className="btn btn--primary menu-card__add"
         aria-label={`${menu.name} 장바구니에 담기`}
         onClick={handleAdd}
+        disabled={isSoldOut}
       >
-        담기
+        {isSoldOut ? '품절' : '담기'}
       </button>
     </article>
   )

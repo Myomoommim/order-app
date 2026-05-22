@@ -7,7 +7,7 @@ import {
 } from '../utils/cart'
 import './Cart.css'
 
-function Cart({ items, onOrder, onUpdateQuantity }) {
+function Cart({ items, onOrder, onUpdateQuantity, ordering = false }) {
   const { showToast } = useToast()
   const total = getCartTotal(items)
   const isEmpty = items.length === 0
@@ -77,9 +77,9 @@ function Cart({ items, onOrder, onUpdateQuantity }) {
             type="button"
             className="btn btn--primary btn--large cart__order"
             onClick={handleOrder}
-            disabled={isEmpty}
+            disabled={isEmpty || ordering}
           >
-            주문하기
+            {ordering ? '주문 중...' : '주문하기'}
           </button>
         </div>
       </div>

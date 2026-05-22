@@ -67,3 +67,19 @@
   width: 100%;
   margin-top: auto;
 }
+
+.menu-card__add:disabled {
+  background: #a0c4e8;
+  cursor: not-allowed;
+}
+
+.menu-card--sold-out {
+  opacity: 0.65;
+}
+
+.menu-card__sold-out {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #b91c1c;
+}

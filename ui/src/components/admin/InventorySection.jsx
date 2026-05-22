@@ -1,7 +1,7 @@
 import { getStockStatus } from '../../utils/inventory'
 import './InventorySection.css'
 
-function InventorySection({ inventory, onUpdateStock }) {
+function InventorySection({ inventory, onUpdateStock, pendingMenuId = null }) {
   return (
     <section className="admin-section inventory-section">
       <h2 className="admin-section__title">재고 현황</h2>
@@ -23,7 +23,7 @@ function InventorySection({ inventory, onUpdateStock }) {
                   className="inventory-card__btn"
                   aria-label={`${item.menuName} 재고 줄이기`}
                   onClick={() => onUpdateStock(item.menuId, -1)}
-                  disabled={item.stock === 0}
+                  disabled={item.stock === 0 || pendingMenuId === item.menuId}
                 >
                   -
                 </button>
@@ -32,6 +32,7 @@ function InventorySection({ inventory, onUpdateStock }) {
                   className="inventory-card__btn"
                   aria-label={`${item.menuName} 재고 늘리기`}
                   onClick={() => onUpdateStock(item.menuId, 1)}
+                  disabled={pendingMenuId === item.menuId}
                 >
                   +
                 </button>

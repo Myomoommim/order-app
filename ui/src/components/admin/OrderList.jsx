@@ -5,7 +5,7 @@ import {
 import { formatOrderDisplay } from '../../utils/order'
 import './OrderList.css'
 
-function OrderList({ orders, onUpdateStatus }) {
+function OrderList({ orders, onUpdateStatus, pendingOrderId = null }) {
   return (
     <section className="admin-section order-list-section">
       <h2 className="admin-section__title">주문 현황</h2>
@@ -32,8 +32,9 @@ function OrderList({ orders, onUpdateStatus }) {
                     type="button"
                     className="btn btn--primary order-list__action"
                     onClick={() => onUpdateStatus(order.id, action.next)}
+                    disabled={pendingOrderId === order.id}
                   >
-                    {action.label}
+                    {pendingOrderId === order.id ? '처리 중...' : action.label}
                   </button>
                 ) : null}
               </li>
