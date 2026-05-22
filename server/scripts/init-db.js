@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import pg from 'pg'
 import 'dotenv/config'
 import { parseDatabaseUrl } from '../src/db/parseDatabaseUrl.js'
+import { withPgSsl } from '../src/db/pgOptions.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const dbDir = path.join(__dirname, '../src/db')
@@ -13,7 +14,7 @@ async function readSql(filename) {
 }
 
 async function ensureDatabase(adminUrl, database) {
-  const client = new pg.Client({ connectionString: adminUrl })
+  const client = new pg.Client(withPgSsl(adminUrl))
   await client.connect()
 
   try {
@@ -35,7 +36,7 @@ async function ensureDatabase(adminUrl, database) {
 
 async function runSqlFile(connectionString, filename) {
   const sql = await readSql(filename)
-  const client = new pg.Client({ connectionString })
+  const client = new pg.Client(withPgSsl(connectionString))
   await client.connect()
 
   try {
@@ -56,7 +57,12 @@ async function main() {
   const { database, adminUrl, appUrl } = parseDatabaseUrl(databaseUrl)
 
   console.log('PostgreSQL 초기화 시작...')
-  await ensureDatabase(adminUrl, database)
+  const isManagedCloud = databaseUrl.includes('render.com')
+  if (!isManagedCloud) {
+    await ensureDatabase(adminUrl, database)
+  } else {
+    console.log(`관리형 DB 사용 — 생성 단계 생략: ${database}`)
+  }
   await runSqlFile(appUrl, 'schema.sql')
   await runSqlFile(appUrl, 'seed.sql')
   console.log('PostgreSQL 초기화 완료')

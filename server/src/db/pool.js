@@ -1,5 +1,6 @@
 import pg from 'pg'
 import config from '../config/index.js'
+import { withPgSsl } from './pgOptions.js'
 
 const { Pool } = pg
 
@@ -11,9 +12,7 @@ export function getPool() {
   }
 
   if (!pool) {
-    pool = new Pool({
-      connectionString: config.databaseUrl,
-    })
+    pool = new Pool(withPgSsl(config.databaseUrl))
   }
 
   return pool
